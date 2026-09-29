@@ -1,0 +1,16 @@
+# Render Blueprint: New + > Blueprint > wybierz to repo. Szczegóły w README.md.
+services:
+  - type: web
+    name: neoclans-roller
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    # Jeden proces, żeby pamięć podręczna tabeli genów była spójna; wątki wystarczą dla kilku osób.
+    startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 60
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: ADMIN_PASSWORD
+        sync: false # Render zapyta o hasło przy tworzeniu
+      - key: DATABASE_URL
+        sync: false # connection string z Neon (postgresql://...)

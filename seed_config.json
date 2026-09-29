@@ -1,0 +1,136 @@
+{
+  "tiers": [
+    { "id": "common", "name": "Common" },
+    { "id": "uncommon", "name": "Uncommon" },
+    { "id": "rare", "name": "Rare" }
+  ],
+  "modes": [
+    { "id": "common", "name": "Common", "weights": { "common": 100, "uncommon": 0, "rare": 0 } },
+    { "id": "uncommon", "name": "Uncommon", "weights": { "common": 70, "uncommon": 30, "rare": 0 } },
+    { "id": "rare", "name": "Rare", "weights": { "common": 50, "uncommon": 30, "rare": 20 } }
+  ],
+  "genes": [
+    {
+      "symbol": "W",
+      "name": "Biel dominująca",
+      "order": 5,
+      "sexLinked": false,
+      "alleles": [
+        { "symbol": "W", "name": "Biały (biel dominująca)", "tier": "rare", "weight": 0.25, "quiet": false, "masks": ["*"] },
+        { "symbol": "w", "name": "Bez bieli dominującej", "tier": "common", "weight": 1, "quiet": true, "masks": [] }
+      ],
+      "combos": []
+    },
+    {
+      "symbol": "B",
+      "name": "Kolor bazowy (eumelanina)",
+      "order": 10,
+      "sexLinked": false,
+      "alleles": [
+        { "symbol": "B", "name": "Czarny", "tier": "common", "weight": 1, "quiet": false, "masks": [] },
+        { "symbol": "b", "name": "Czekoladowy", "tier": "uncommon", "weight": 1, "quiet": false, "masks": [] },
+        { "symbol": "bl", "name": "Cynamonowy", "tier": "rare", "weight": 1, "quiet": false, "masks": [] }
+      ],
+      "combos": []
+    },
+    {
+      "symbol": "O",
+      "name": "Rudy (sprzężony z płcią)",
+      "order": 20,
+      "sexLinked": true,
+      "alleles": [
+        { "symbol": "O", "name": "Rudy", "tier": "common", "weight": 1, "quiet": false, "masks": ["B", "A"] },
+        { "symbol": "o", "name": "Nie-rudy", "tier": "common", "weight": 3, "quiet": true, "masks": [] }
+      ],
+      "combos": [
+        { "alleles": ["O", "o"], "name": "Szylkret (tortie)", "quiet": false, "masks": [] }
+      ]
+    },
+    {
+      "symbol": "D",
+      "name": "Rozjaśnienie (dilute)",
+      "order": 30,
+      "sexLinked": false,
+      "alleles": [
+        { "symbol": "D", "name": "Pełny kolor", "tier": "common", "weight": 1, "quiet": true, "masks": [] },
+        { "symbol": "d", "name": "Rozjaśniony", "tier": "common", "weight": 1, "quiet": false, "masks": [] }
+      ],
+      "combos": []
+    },
+    {
+      "symbol": "I",
+      "name": "Inhibitor (srebro)",
+      "order": 40,
+      "sexLinked": false,
+      "alleles": [
+        { "symbol": "I", "name": "Srebrny / dymny", "tier": "rare", "weight": 0.5, "quiet": false, "masks": [] },
+        { "symbol": "i", "name": "Bez srebra", "tier": "common", "weight": 1, "quiet": true, "masks": [] }
+      ],
+      "combos": []
+    },
+    {
+      "symbol": "S",
+      "name": "Białe łaty",
+      "order": 50,
+      "sexLinked": false,
+      "alleles": [
+        { "symbol": "S", "name": "Białe łaty", "tier": "uncommon", "weight": 1, "quiet": false, "masks": [] },
+        { "symbol": "s", "name": "Bez białych łat", "tier": "common", "weight": 1, "quiet": true, "masks": [] }
+      ],
+      "combos": [
+        { "alleles": ["S", "S"], "name": "Dużo bieli (van / arlekin)", "quiet": false, "masks": [] },
+        { "alleles": ["S", "s"], "name": "Trochę bieli (bicolor)", "quiet": false, "masks": [] }
+      ]
+    },
+    {
+      "symbol": "A",
+      "name": "Agouti",
+      "order": 60,
+      "sexLinked": false,
+      "alleles": [
+        { "symbol": "A", "name": "Agouti (widać pręgi)", "tier": "common", "weight": 1, "quiet": true, "masks": [] },
+        { "symbol": "a", "name": "Jednolity (bez pręg)", "tier": "common", "weight": 1, "quiet": false, "masks": ["T"] }
+      ],
+      "combos": []
+    },
+    {
+      "symbol": "T",
+      "name": "Wzór pręgowania",
+      "order": 61,
+      "sexLinked": false,
+      "alleles": [
+        { "symbol": "Ta", "name": "Pręgi tykowane (ticked)", "tier": "rare", "weight": 1, "quiet": false, "masks": [] },
+        { "symbol": "T", "name": "Pręgi tygrysie (mackerel)", "tier": "common", "weight": 1, "quiet": false, "masks": [] },
+        { "symbol": "tb", "name": "Pręgi marmurkowe (classic)", "tier": "uncommon", "weight": 1, "quiet": false, "masks": [] }
+      ],
+      "combos": []
+    },
+    {
+      "symbol": "C",
+      "name": "Seria albinotyczna (pointy)",
+      "order": 70,
+      "sexLinked": false,
+      "alleles": [
+        { "symbol": "C", "name": "Pełne wybarwienie", "tier": "common", "weight": 1, "quiet": true, "masks": [] },
+        { "symbol": "cb", "name": "Burmski (sepia)", "tier": "uncommon", "weight": 1, "quiet": false, "masks": [] },
+        { "symbol": "cs", "name": "Syjamski (colorpoint)", "tier": "uncommon", "weight": 1, "quiet": false, "masks": [] },
+        { "symbol": "ca", "name": "Albinos niebieskooki", "tier": "rare", "weight": 1, "quiet": false, "masks": ["B", "O", "D", "I", "A", "T"] },
+        { "symbol": "c", "name": "Albinos (czerwone oczy)", "tier": "rare", "weight": 1, "quiet": false, "masks": ["B", "O", "D", "I", "A", "T"] }
+      ],
+      "combos": [
+        { "alleles": ["cb", "cs"], "name": "Mink (tonkijski)", "quiet": false, "masks": [] }
+      ]
+    },
+    {
+      "symbol": "L",
+      "name": "Długość sierści",
+      "order": 80,
+      "sexLinked": false,
+      "alleles": [
+        { "symbol": "L", "name": "Krótka sierść", "tier": "common", "weight": 1, "quiet": false, "masks": [] },
+        { "symbol": "l", "name": "Długa sierść", "tier": "common", "weight": 1, "quiet": false, "masks": [] }
+      ],
+      "combos": []
+    }
+  ]
+}

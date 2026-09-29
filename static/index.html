@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Neoclans Roller</title>
+  <meta name="description" content="Losowanie genotypów i krzyżówki genetyczne kotów.">
+  <link rel="icon" href="/kotek_ikonka.png" type="image/png">
+  <link rel="apple-touch-icon" href="/kotek_ikonka.png">
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">
+      <img src="/kotek_ikonka.png" alt="" width="46" height="47">
+      <span><strong>Neoclans Roller</strong><small>genotypy i krzyżówki kotów</small></span>
+    </a>
+    <nav class="tabs" role="tablist" aria-label="Sekcje">
+      <button type="button" role="tab" id="tab-btn-roll" data-tab="roll" aria-selected="true" aria-controls="tab-roll">🎲 Losowanie z tabeli</button>
+      <button type="button" role="tab" id="tab-btn-breed" data-tab="breed" aria-selected="false" aria-controls="tab-breed">🐾 Krzyżówka rodziców</button>
+    </nav>
+  </header>
+
+  <div id="wake" class="notice" hidden>
+    😴 Budzę serwer… Darmowy hosting usypia stronę po kwadransie bez ruchu, więc pierwsze wejście może potrwać do minuty.
+  </div>
+  <div id="fatal" class="notice error" hidden></div>
+
+  <main>
+    <div class="sortbar">
+      <span>Kolejność genów:</span>
+      <div class="seg" id="sort-seg" role="group" aria-label="Kolejność genów">
+        <button type="button" data-sort="genotype" title="Geny alfabetycznie po symbolu (A, B, C, D…)">wg genotypu (A→Z)</button>
+        <button type="button" data-sort="phenotype" title="Jak w opisie ubarwienia: kolor → srebro → biel → wzór → pointy → sierść">wg fenotypu (opis ubarwienia)</button>
+      </div>
+    </div>
+
+    <section id="tab-roll" role="tabpanel" aria-labelledby="tab-btn-roll">
+      <div class="panel">
+        <div class="controls">
+          <div class="field">
+            <span>Tryb</span>
+            <div class="seg" id="mode-seg" role="group" aria-label="Tryb losowania"></div>
+          </div>
+          <label class="field">
+            <span>Płeć</span>
+            <select id="roll-sex">
+              <option value="">losowa</option>
+              <option value="F">kotka ♀</option>
+              <option value="M">kocur ♂</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Ile kotów</span>
+            <input id="roll-count" type="number" min="1" max="20" value="1">
+          </label>
+          <button type="button" id="roll-btn" class="primary">🎲 Losuj</button>
+        </div>
+        <p class="muted small" id="mode-hint" style="margin:10px 0 0"></p>
+      </div>
+      <div id="roll-error"></div>
+      <div id="roll-results" class="cards"></div>
+    </section>
+
+    <section id="tab-breed" role="tabpanel" aria-labelledby="tab-btn-breed" hidden>
+      <div class="parents">
+        <div class="panel parent" id="parent-mother"></div>
+        <div class="panel parent" id="parent-father"></div>
+      </div>
+      <div class="panel">
+        <div class="breed-bar">
+          <label class="field">
+            <span>Ile kociąt wylosować</span>
+            <input id="litter" type="number" min="1" max="12" value="1">
+          </label>
+          <button type="button" id="breed-btn" class="primary">🐾 Krzyżuj i losuj</button>
+          <span class="muted small">Każdy gen dziedziczy się osobno: po jednym allelu od matki i od ojca.</span>
+        </div>
+      </div>
+      <div id="breed-error"></div>
+      <div id="breed-results"></div>
+    </section>
+  </main>
+
+  <footer>
+    <span class="paws" aria-hidden="true">🐾🐾🐾</span>
+    <a href="/admin">panel admina</a>
+  </footer>
+</body>
+</html>
