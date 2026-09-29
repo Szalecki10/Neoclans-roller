@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sqlite3
 from contextlib import closing
 from datetime import datetime, timezone
@@ -138,13 +139,15 @@ def _row(version_id, created_at, note, data=None):
 
 
 def open_store(base_dir):
-    url = os.environ.get("DATABASE_URL", "").strip()
-    if url:
-        # Bez wypisywania wartości: to connection string z hasłem do bazy.
-        if not url.startswith(("postgresql://", "postgres://")):
+    raw = os.environ.get("DATABASE_URL", "").strip()
+    if raw:
+        # Wyciągamy sam adres, nawet jeśli wklejono „DATABASE_URL=…”, „psql '…'” albo adres w cudzysłowach.
+        # Wartości nie wypisujemy: to connection string z hasłem do bazy.
+        match = re.search(r"postgres(?:ql)?://[^\s'\"]+", raw)
+        if not match:
             raise RuntimeError(
-                "DATABASE_URL musi być connection stringiem z Neona zaczynającym się od postgresql:// "
-                "(wklej sam adres, bez „psql” i cudzysłowów)."
+                "DATABASE_URL musi zawierać connection string z Neona zaczynający się od postgresql:// "
+                "– sprawdź, czy nie zamieniły się miejscami DATABASE_URL i ADMIN_PASSWORD."
             )
-        return PostgresStore(url)
+        return PostgresStore(match.group(0))
     return SqliteStore(os.environ.get("SQLITE_PATH") or os.path.join(base_dir, "data", "neoclans.db"))
