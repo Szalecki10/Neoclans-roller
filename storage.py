@@ -140,5 +140,11 @@ def _row(version_id, created_at, note, data=None):
 def open_store(base_dir):
     url = os.environ.get("DATABASE_URL", "").strip()
     if url:
+        # Bez wypisywania wartości: to connection string z hasłem do bazy.
+        if not url.startswith(("postgresql://", "postgres://")):
+            raise RuntimeError(
+                "DATABASE_URL musi być connection stringiem z Neona zaczynającym się od postgresql:// "
+                "(wklej sam adres, bez „psql” i cudzysłowów)."
+            )
         return PostgresStore(url)
     return SqliteStore(os.environ.get("SQLITE_PATH") or os.path.join(base_dir, "data", "neoclans.db"))
