@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import secrets
 import sqlite3
 from contextlib import closing
 from datetime import datetime, timezone
@@ -32,9 +33,18 @@ class SqliteStore:
                        data TEXT NOT NULL
                    )"""
             )
+            conn.execute("CREATE TABLE IF NOT EXISTS app_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
 
     def _connect(self):
         return sqlite3.connect(self.path, timeout=10)
+
+    def secret(self, key):
+        """Losowa wartość zapisana w bazie przy pierwszym użyciu (np. klucz sesji)."""
+        with closing(self._connect()) as conn, conn:
+            conn.execute(
+                "INSERT OR IGNORE INTO app_meta (key, value) VALUES (?, ?)", (key, secrets.token_hex(32))
+            )
+            return conn.execute("SELECT value FROM app_meta WHERE key = ?", (key,)).fetchone()[0]
 
     def latest(self):
         with closing(self._connect()) as conn:
@@ -89,10 +99,20 @@ class PostgresStore:
                        data JSONB NOT NULL
                    )"""
             )
+            conn.execute("CREATE TABLE IF NOT EXISTS app_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
 
     def _connect(self):
         # Darmowy Neon usypia bazę po 5 min bez ruchu; pierwsze połączenie ją budzi.
         return self._psycopg.connect(self.url, autocommit=True, connect_timeout=20)
+
+    def secret(self, key):
+        """Losowa wartość zapisana w bazie przy pierwszym użyciu (np. klucz sesji)."""
+        with self._connect() as conn:
+            conn.execute(
+                "INSERT INTO app_meta (key, value) VALUES (%s, %s) ON CONFLICT (key) DO NOTHING",
+                (key, secrets.token_hex(32)),
+            )
+            return conn.execute("SELECT value FROM app_meta WHERE key = %s", (key,)).fetchone()[0]
 
     def latest(self):
         with self._connect() as conn:
@@ -147,7 +167,7 @@ def open_store(base_dir):
         if not match:
             raise RuntimeError(
                 "DATABASE_URL musi zawierać connection string z Neona zaczynający się od postgresql:// "
-                "– sprawdź, czy nie zamieniły się miejscami DATABASE_URL i ADMIN_PASSWORD."
+                "(Neon → projekt → Connect), a nie adres strony ani hasło."
             )
         return PostgresStore(match.group(0))
     return SqliteStore(os.environ.get("SQLITE_PATH") or os.path.join(base_dir, "data", "neoclans.db"))

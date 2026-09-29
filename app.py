@@ -7,11 +7,9 @@ Na Renderze: gunicorn app:app        (patrz render.yaml i README.md)
 from __future__ import annotations
 
 import hashlib
-import hmac
 import json
 import mimetypes
 import os
-import secrets
 import threading
 import time
 from datetime import timedelta
@@ -20,6 +18,7 @@ from functools import wraps
 from flask import Flask, jsonify, request, session
 from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.proxy_fix import ProxyFix
+from werkzeug.security import check_password_hash
 
 import genetics
 from storage import open_store
@@ -30,38 +29,18 @@ SEED_PATH = os.path.join(BASE_DIR, "seed_config.json")
 # Windows potrafi mieć w rejestrze .js = text/plain, a przeglądarka wtedy nie załaduje modułów.
 mimetypes.add_type("text/javascript", ".js")
 
-# --------------------------------------------------------------------------- hasło i sesja
+# --------------------------------------------------------------------------- hasło admina
 
-
-def load_dotenv(path):
-    """Lokalnie: zmienne z pliku .env (na Renderze ustawia się je w panelu)."""
-    if not os.path.exists(path):
-        return
-    with open(path, encoding="utf-8") as fh:
-        for line in fh:
-            key, sep, value = line.strip().partition("=")
-            if sep and key and not key.startswith("#"):
-                os.environ.setdefault(key.strip(), value.strip())
-
-
-load_dotenv(os.path.join(BASE_DIR, ".env"))
-
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
-PASSWORD_FROM_ENV = bool(ADMIN_PASSWORD)
-if not PASSWORD_FROM_ENV:
-    ADMIN_PASSWORD = secrets.token_urlsafe(9)
-    print(
-        "[neoclans] Nie ustawiono ADMIN_PASSWORD – tymczasowe hasło admina "
-        f"(ważne do restartu): {ADMIN_PASSWORD}",
-        flush=True,
-    )
+# W kodzie jest tylko hash (scrypt), nie samo hasło. Zmiana hasła:
+#   python -c "from werkzeug.security import generate_password_hash as g; print(g(input('Hasło: ')))"
+# wklej wynik poniżej, commit, push. Zmiana hasła wylogowuje wszystkich.
+ADMIN_PASSWORD_HASH = (
+    "scrypt:32768:8:1$l19Kg9CYVjZ6ABtF$5e74a34696ad1294f32ca36665f91d907d95d9790b697d417ab5537327aaa6b0"
+    "342e064cfb80a99eebec885885f5cc1219fae4444f2bc933edf78de91eacc289"
+)
 
 app = Flask(__name__, static_folder="static", static_url_path="")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
-# Klucz sesji wynika z hasła, więc zmiana hasła wylogowuje wszystkich.
-app.secret_key = os.environ.get("SECRET_KEY") or hashlib.sha256(
-    ("neoclans-session:" + ADMIN_PASSWORD).encode()
-).digest()
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
@@ -114,6 +93,12 @@ class ConfigHolder:
 
 store = open_store(BASE_DIR)
 configs = ConfigHolder(store)
+
+# Klucz podpisujący ciasteczko sesji: losowy, trzymany w bazie (nie w repo, bo z nim dałoby się
+# podrobić logowanie). Doklejony hash hasła sprawia, że zmiana hasła unieważnia stare sesje.
+app.secret_key = hashlib.sha256(
+    (store.secret("session_key") + ADMIN_PASSWORD_HASH).encode()
+).digest()
 
 # --------------------------------------------------------------------------- pomocnicze
 
@@ -263,9 +248,7 @@ def login():
         if len(recent) >= 10:
             return jsonify(error="Za dużo nieudanych prób. Spróbuj za kwadrans."), 429
     password = body().get("password")
-    if not isinstance(password, str) or not hmac.compare_digest(
-        password.encode(), ADMIN_PASSWORD.encode()
-    ):
+    if not isinstance(password, str) or not check_password_hash(ADMIN_PASSWORD_HASH, password):
         with _failed_lock:
             _failed_logins.setdefault(ip, []).append(now)
         time.sleep(0.5)
@@ -286,7 +269,7 @@ def logout():
 
 @app.get("/api/admin/me")
 def me():
-    return jsonify(admin=bool(session.get("admin")), passwordFromEnv=PASSWORD_FROM_ENV)
+    return jsonify(admin=bool(session.get("admin")))
 
 
 @app.get("/api/admin/config")

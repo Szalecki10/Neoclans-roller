@@ -90,7 +90,7 @@ python -m venv .venv
 .venv/Scripts/python app.py
 ```
 
-Strona będzie pod http://localhost:5000, a panel pod http://localhost:5000/admin. Bez `DATABASE_URL` dane trafiają do lokalnego pliku SQLite `data/neoclans.db`. Bez `ADMIN_PASSWORD` serwer wypisze w konsoli tymczasowe hasło.
+Strona będzie pod http://localhost:5000, a panel pod http://localhost:5000/admin. Bez `DATABASE_URL` dane trafiają do lokalnego pliku SQLite `data/neoclans.db`. Hasło do panelu jest takie samo jak na produkcji (patrz „Hasło admina”).
 
 Testy:
 
@@ -108,17 +108,23 @@ Darmowa baza Postgres na Renderze znika po 30 dniach, więc baza stoi na **Neon*
 
 1. **GitHub** – wrzuć to repozytorium (może być prywatne).
 2. **Neon** – załóż konto na [neon.com](https://neon.com), utwórz projekt (region np. Frankfurt), skopiuj *connection string* (`postgresql://…?sslmode=require…`).
-3. **Render** – na [render.com](https://render.com): **New → Blueprint** → wybierz repo. Render przeczyta `render.yaml` i zapyta o:
-   - `ADMIN_PASSWORD` – hasło do panelu admina,
-   - `DATABASE_URL` – connection string z Neona.
+3. **Render** – na [render.com](https://render.com): **New → Blueprint** → wybierz repo. Render przeczyta `render.yaml` i zapyta o `DATABASE_URL` – connection string z Neona.
 4. Po buildzie strona działa pod `https://neoclans-roller.onrender.com` (albo podobnym adresem). Link wysyłasz znajomym, a hasło dajesz tylko adminowi.
 
-Bez Blueprinta: **New → Web Service**, runtime Python, build `pip install -r requirements.txt`, start `gunicorn app:app --workers 1 --threads 4 --timeout 60`, plan Free, plus te same dwie zmienne środowiskowe.
+Bez Blueprinta: **New → Web Service**, runtime Python, build `pip install -r requirements.txt`, start `gunicorn app:app --workers 1 --threads 4 --timeout 60`, plan Free, plus zmienna `DATABASE_URL`.
 
 **Uśpienie:** darmowy Render usypia stronę po 15 minutach bez ruchu. Pierwsze wejście potem trwa ok. 30–60 s (strona pokazuje wtedy komunikat „Budzę serwer…”). Neon też usypia bazę, ale budzi się w ułamku sekundy.
 
 ### Hasło admina
-Hasło jest w zmiennej środowiskowej `ADMIN_PASSWORD` na Renderze, a **nie w kodzie**. Kod leży na GitHubie, więc hasło wpisane w plik zobaczyłby każdy, kto ma dostęp do repo. Zmiana hasła w Renderze wylogowuje wszystkie sesje. Po 10 błędnych próbach z jednego adresu logowanie jest blokowane na 15 minut.
+W kodzie ([`app.py`](app.py), `ADMIN_PASSWORD_HASH`) jest tylko **hash** hasła (scrypt), nie samo hasło – kto zajrzy do repo, hasła nie odczyta. Klucz podpisujący sesję logowania jest losowy i leży w bazie danych (tabela `app_meta`), nie w repo.
+
+Zmiana hasła:
+
+```bash
+.venv/Scripts/python -c "from werkzeug.security import generate_password_hash as g; print(g(input('Hasło: ')))"
+```
+
+Wynik wklej w `ADMIN_PASSWORD_HASH` w `app.py`, zrób commit i push. Zmiana hasła wylogowuje wszystkie sesje. Po 10 błędnych próbach z jednego adresu logowanie jest blokowane na 15 minut.
 
 ### Kopie zapasowe
 - Panel admina → **Kopia zapasowa i historia**: ostatnie 200 zapisów, każdy można wczytać i przywrócić.

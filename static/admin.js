@@ -26,7 +26,7 @@ async function init() {
   try {
     const me = await api("/api/admin/me");
     if (me.admin) await loadEditor();
-    else renderLogin(me);
+    else renderLogin();
   } catch (error) {
     showErrors(root, error);
   }
@@ -34,7 +34,7 @@ async function init() {
 
 // ------------------------------------------------------------------ logowanie
 
-function renderLogin(me = { passwordFromEnv: true }) {
+function renderLogin() {
   cfg = null;
   const input = el("input", { type: "password", autocomplete: "current-password", required: true });
   const message = el("div");
@@ -55,9 +55,6 @@ function renderLogin(me = { passwordFromEnv: true }) {
     el("label", { class: "field" }, el("span", {}, "Hasło admina"), input),
     el("button", { class: "primary", type: "submit" }, "Zaloguj"),
     message,
-    me.passwordFromEnv
-      ? null
-      : el("p", { class: "muted small" }, "Na serwerze nie ustawiono ADMIN_PASSWORD – tymczasowe hasło jest w logach serwera."),
   );
   root.replaceChildren(el("div", { class: "panel login" }, el("h2", {}, "🔒 Logowanie"), form));
   input.focus();

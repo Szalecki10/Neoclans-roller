@@ -11,7 +11,6 @@ services:
     healthCheckPath: /api/health
     autoDeploy: true
     envVars:
-      - key: ADMIN_PASSWORD
-        sync: false # Render zapyta o hasło przy tworzeniu
+      # Hasło admina jest w app.py jako hash – tu tylko baza.
       - key: DATABASE_URL
         sync: false # connection string z Neon (postgresql://...)
