@@ -4,6 +4,7 @@ services:
     name: neoclans-roller
     runtime: python
     plan: free
+    region: frankfurt # baza na Neonie też we Frankfurcie (AWS eu-central-1)
     buildCommand: pip install -r requirements.txt
     # Jeden proces, żeby pamięć podręczna tabeli genów była spójna; wątki wystarczą dla kilku osób.
     startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 60
